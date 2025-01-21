@@ -3,46 +3,54 @@ package com.example.Finance_crud_tool.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "client")
 @Entity(name = "Client")
 @Setter
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Client {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String identification_type;
+
     private Long identification_number;
 
-    @NotNull(message = "El nombre es obligatorio")
+
     @Size(min = 2, message = "El nombre debe tener al menos 2 caracteres")
     private String name;
 
-    @NotNull(message = "El apellido es obligatorio")
+
     @Size(min = 2, message = "El apellido debe tener al menos 2 caracteres")
     private String last_name;
 
     @Email
     private String email;
 
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
+
     @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
     private LocalDate birth_date;
+
+
     private LocalDateTime creation_date = LocalDateTime.now();
     private LocalDateTime update_date = LocalDateTime.now();
+
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

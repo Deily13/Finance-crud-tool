@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Table(name = "produtc")
+@Table(name = "product")
 @Entity(name = "Product")
 @Setter
 @Getter
@@ -43,4 +43,23 @@ public class Product {
 
     private LocalDateTime update_date = LocalDateTime.now();
 
+
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.creation_date == null) {
+            this.creation_date = LocalDateTime.now();
+        }
+        if (this.update_date == null) {
+            this.update_date = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.update_date = LocalDateTime.now();
+    }
 }
