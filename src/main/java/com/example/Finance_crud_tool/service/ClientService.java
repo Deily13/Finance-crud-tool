@@ -7,6 +7,8 @@ public interface ClientService {
 
 
     void createClient(@Valid ClientRequestDTO clientRequestDTO);
+
+    void updateClient(Long clientId, ClientRequestDTO clientRequestDTO);
 }
 
 

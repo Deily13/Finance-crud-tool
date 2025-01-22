@@ -48,6 +48,7 @@ public class Product {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
+
     @PrePersist
     public void prePersist() {
         if (this.creation_date == null) {

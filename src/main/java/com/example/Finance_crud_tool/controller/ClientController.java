@@ -5,7 +5,9 @@ import com.example.Finance_crud_tool.dto.ClientRequestDTO;
 
 import com.example.Finance_crud_tool.service.ClientService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +21,19 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createClient(@Valid @RequestBody ClientRequestDTO clientRequestDTO) {
+    public ResponseEntity<String> createClient(@Valid @RequestBody ClientRequestDTO clientRequestDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // Si hay errores, se retornan los errores con un mensaje específico
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(bindingResult.getAllErrors().toString());
+        }
         clientService.createClient(clientRequestDTO);
         return ResponseEntity.ok("Client created successfully");
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateClient(@PathVariable Long id, @RequestBody @Valid ClientRequestDTO clientRequestDTO) {
+        clientService.updateClient(id, clientRequestDTO);
+        return ResponseEntity.ok("Cliente actualizado exitosamente.");
+    }
+
 }
