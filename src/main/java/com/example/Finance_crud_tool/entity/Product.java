@@ -31,9 +31,18 @@ public class Product {
         CURRENT
     }
 
-    private int account_number;
+    @Column(name = "account_number", unique = true, nullable = false, length = 10)
+    private String account_number;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
+
+    public enum Status {
+        Activa,
+        Inactiva,
+        Bloqueada
+    }
 
     private BigDecimal balance;
 

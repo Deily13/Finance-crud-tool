@@ -82,7 +82,7 @@ public class ClientServiceImpl implements ClientService {
         if (!clientRepository.existsById(clientId)) {
             throw new IllegalArgumentException("El cliente con ID " + clientId + " no existe.");
         }
-        
+
         clientRepository.deleteById(clientId);
         return null;
     }
