@@ -65,9 +65,8 @@ public class Client {
     private LocalDateTime update_date = LocalDateTime.now();
 
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
-
 
     @PrePersist
     public void prePersist() {

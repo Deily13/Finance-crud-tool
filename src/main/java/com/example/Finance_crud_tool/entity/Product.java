@@ -32,17 +32,18 @@ public class Product {
     }
 
     @Column(name = "account_number", unique = true, nullable = false, length = 10)
-    private String account_number;
+    private String accountNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
+    private Status status  = Status.Activa;
 
     public enum Status {
         Activa,
         Inactiva,
         Bloqueada
     }
+
 
     private BigDecimal balance;
 
@@ -53,13 +54,18 @@ public class Product {
     private LocalDateTime update_date = LocalDateTime.now();
 
 
-    @ManyToOne
-    @JoinColumn(name = "client_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
 
 
     @PrePersist
     public void prePersist() {
+
+        if (this.status == null) {
+            this.status = Status.Activa;
+        }
+
         if (this.creation_date == null) {
             this.creation_date = LocalDateTime.now();
         }
