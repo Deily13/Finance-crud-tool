@@ -5,6 +5,7 @@ import com.example.Finance_crud_tool.dto.ClientRequestDTO;
 import com.example.Finance_crud_tool.entity.Client;
 import com.example.Finance_crud_tool.repository.ClientRepository;
 import com.example.Finance_crud_tool.service.ClientService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,9 +22,9 @@ public class ClientServiceImpl implements ClientService {
     }
 
     private boolean isUnderage(LocalDate birthDate) {
-        LocalDate currentDate = LocalDate.now();   // Obtiene la fecha actual.
-        Period age = Period.between(birthDate, currentDate);  // Calcula la diferencia entre la fecha de nacimiento y la fecha actual.
-        return age.getYears() < 18;  // Si la edad en años es menor que 18, devuelve true, indicando que la persona es menor de edad.
+        LocalDate currentDate = LocalDate.now();
+        Period age = Period.between(birthDate, currentDate);
+        return age.getYears() < 18;
     }
 
 
@@ -45,11 +46,10 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void updateClient(Long clientId, ClientRequestDTO clientRequestDTO) {
-        // Verificar si el cliente existe
+
         Client existingClient = clientRepository.findById(clientId)
                 .orElseThrow(() -> new IllegalArgumentException("El cliente con ID " + clientId + " no existe."));
 
-        // Actualizar los campos del cliente usando Optional para evitar múltiples if
         Optional.ofNullable(clientRequestDTO.identification_type())
                 .ifPresent(existingClient::setIdentification_type);
 
@@ -73,8 +73,18 @@ public class ClientServiceImpl implements ClientService {
                     existingClient.setBirth_date(birthDate);
                 });
 
-        // Guardar los cambios
         clientRepository.save(existingClient);
+    }
+
+    @Override
+    public ResponseEntity<String> deleteClient(Long clientId) {
+
+        if (!clientRepository.existsById(clientId)) {
+            throw new IllegalArgumentException("El cliente con ID " + clientId + " no existe.");
+        }
+        
+        clientRepository.deleteById(clientId);
+        return null;
     }
 
 
