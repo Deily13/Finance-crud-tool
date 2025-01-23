@@ -38,7 +38,10 @@ public class ProductServiceImpl  implements ProductService {
         String lastAccountNumber = productRepository.findMaxAccountNumberStartingWith(
                 createProductDto.accountType() == Product.AccountType.SAVINGS ? "53" : "33");
 
+        System.out.println("Last Account Number: " + lastAccountNumber);
+
         String accountNumber = generateNextAccountNumber(lastAccountNumber, createProductDto.accountType());
+        System.out.println("Generated Account Number: " + accountNumber);
 
         Product product = new Product();
         product.setAccountType(createProductDto.accountType());
@@ -54,6 +57,8 @@ public class ProductServiceImpl  implements ProductService {
             product.setStatus(createProductDto.status());
         }
 
+        System.out.println("Product to Save: " + product);
+
         return productRepository.save(product);
     }
 
@@ -61,7 +66,12 @@ public class ProductServiceImpl  implements ProductService {
         String prefix = accountType == Product.AccountType.SAVINGS ? "53" : "33";
 
         if (lastAccountNumber == null) {
+            // Generar el primer número si no hay cuentas previas
             return prefix + String.format("%08d", 1);
+        }
+
+        if (!lastAccountNumber.startsWith(prefix) || lastAccountNumber.length() != 10) {
+            throw new IllegalArgumentException("Formato inválido para el número de cuenta: " + lastAccountNumber);
         }
 
         long lastNumber = Long.parseLong(lastAccountNumber.substring(2));
@@ -85,7 +95,7 @@ public class ProductServiceImpl  implements ProductService {
     }
 
     private void validateAccountStatusChange(Product product, Product.Status newStatus) {
-        if (newStatus == Product.Status.Bloqueada && product.getBalance().compareTo(BigDecimal.ZERO) != 0) {
+        if (newStatus == Product.Status.Cancelada && product.getBalance().compareTo(BigDecimal.ZERO) != 0) {
             throw new IllegalArgumentException("La cuenta no puede ser bloqueada si el saldo es diferente de $0.");
         }
     }

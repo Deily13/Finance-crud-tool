@@ -2,13 +2,14 @@ package com.example.Finance_crud_tool.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.transaction.Transaction;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "product")
 @Entity(name = "Product")
@@ -36,15 +37,15 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status  = Status.Activa;
+    private Status status = Status.Activa;
 
     public enum Status {
         Activa,
         Inactiva,
-        Bloqueada
+        Cancelada
     }
 
-
+    @NotNull
     private BigDecimal balance;
 
     private BigDecimal exempt_GMF;
@@ -58,6 +59,11 @@ public class Product {
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     private Client client;
 
+    @OneToMany(mappedBy = "originAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaccion> sentTransactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "destinationAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaccion> receivedTransactions = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

@@ -16,4 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByAccountNumber(String accountNumber);
 
+    boolean existsByClientId(Long clientId);
+
 }

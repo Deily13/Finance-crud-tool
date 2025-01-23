@@ -4,7 +4,9 @@ package com.example.Finance_crud_tool.service.impl;
 import com.example.Finance_crud_tool.dto.ClientRequestDTO;
 import com.example.Finance_crud_tool.entity.Client;
 import com.example.Finance_crud_tool.repository.ClientRepository;
+import com.example.Finance_crud_tool.repository.ProductRepository;
 import com.example.Finance_crud_tool.service.ClientService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,11 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final ProductRepository productRepository;
 
-    public ClientServiceImpl(ClientRepository clientRepository) {
+    public ClientServiceImpl(ClientRepository clientRepository, ProductRepository productRepository) {
         this.clientRepository = clientRepository;
+        this.productRepository = productRepository;
     }
 
     private boolean isUnderage(LocalDate birthDate) {
@@ -83,8 +87,14 @@ public class ClientServiceImpl implements ClientService {
             throw new IllegalArgumentException("El cliente con ID " + clientId + " no existe.");
         }
 
+        boolean hasProducts = productRepository.existsByClientId(clientId);
+        if (hasProducts) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("El cliente con ID " + clientId + " no puede ser eliminado porque tiene productos asociados.");
+        }
+
         clientRepository.deleteById(clientId);
-        return null;
+        return ResponseEntity.ok("El cliente con ID " + clientId + " ha sido eliminado exitosamente.");
     }
 
 

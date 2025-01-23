@@ -38,8 +38,8 @@ public class ClientController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClient(@PathVariable Long id) {
-        clientService.deleteClient(id);
-        return ResponseEntity.ok("Cliente con ID " + id + " eliminado exitosamente.");
+        return clientService.deleteClient(id);
     }
+
 
 }

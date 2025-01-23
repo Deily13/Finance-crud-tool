@@ -55,11 +55,9 @@ public class Client {
     @Email
     private String email;
 
-
     @NotNull
     @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
     private LocalDate birth_date;
-
 
     private LocalDateTime creation_date = LocalDateTime.now();
     private LocalDateTime update_date = LocalDateTime.now();
