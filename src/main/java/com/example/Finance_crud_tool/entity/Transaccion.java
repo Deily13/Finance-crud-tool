@@ -37,7 +37,7 @@ public class Transaccion {
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_account_id", nullable = false)
+    @JoinColumn(name = "origin_account_id", nullable = true)
     private Product originAccount;
 
     // Cuenta de destino
