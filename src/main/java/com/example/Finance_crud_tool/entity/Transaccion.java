@@ -18,9 +18,10 @@ import java.time.LocalDateTime;
 
 public class Transaccion {
 
+
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaccion_type", nullable = false)

@@ -26,80 +26,75 @@ public class TransaccionServiceImpl implements TransaccionService {
     }
 
 
+    @Override
     @Transactional
     public Transaccion processTransaction(TransferenciaRequest request) {
+        Product originAccount = getAccountByNumber(request.originAccountNumber(), "Cuenta emisora no encontrada.");
+        Product destinationAccount = getAccountByNumber(request.destinationAccountNumber(), "Cuenta receptora no encontrada.");
 
-        Product originAccount = productRepository.findByAccountNumber(request.originAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta emisora no encontrada."));
+        validateSufficientFunds(originAccount, request.amount());
 
-        if (originAccount.getBalance().compareTo(request.amount()) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente en la cuenta emisora.");
-        }
+        updateAccountBalances(originAccount, destinationAccount, request.amount());
 
-
-        Product destinationAccount = productRepository.findByAccountNumber(request.destinationAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta receptora no encontrada."));
-
-        originAccount.setBalance(originAccount.getBalance().subtract(request.amount()));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(request.amount()));
-
-        productRepository.save(originAccount);
-        productRepository.save(destinationAccount);
-
-        Transaccion transaccion = new Transaccion();
-        transaccion.setTransaccion_type(Transaccion.Transaccion_type.Transfer);
-        transaccion.setAmount(request.amount());
-        transaccion.setTimestamp(LocalDateTime.now());
-        transaccion.setOriginAccount(originAccount);
-        transaccion.setDestinationAccount(destinationAccount);
-
-        return transaccionRepository.save(transaccion);
+        return saveTransaction(originAccount, destinationAccount, request.amount(), Transaccion.Transaccion_type.Transfer);
     }
 
+    @Override
     @Transactional
     public Transaccion processConsignacion(ConsignacionRequest request) {
-        // Validar que la cuenta destino exista
-        Product destinationAccount = productRepository.findByAccountNumber(request.destinationAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta receptora no encontrada."));
+        Product destinationAccount = getAccountByNumber(request.destinationAccountNumber(), "Cuenta receptora no encontrada.");
 
-        // Actualizar saldo de la cuenta destino
-        destinationAccount.setBalance(destinationAccount.getBalance().add(request.amount()));
-        productRepository.save(destinationAccount);
+        updateAccountBalances(null, destinationAccount, request.amount());
 
-        // Crear y guardar la transacción
+        return saveTransaction(null, destinationAccount, request.amount(), Transaccion.Transaccion_type.Consignment);
+    }
+
+    @Override
+    @Transactional
+    public Transaccion processRetiro(RetiroRequest request) {
+        Product originAccount = getAccountByNumber(request.originAccountNumber(), "Cuenta emisora no encontrada.");
+
+        validateSufficientFunds(originAccount, request.amount());
+
+        updateAccountBalances(originAccount, null, request.amount());
+
+        return saveTransaction(originAccount, null, request.amount(), Transaccion.Transaccion_type.Withdrawal);
+    }
+
+    // Métodos auxiliares privados para reducir la repetición de código
+
+    private Product getAccountByNumber(String accountNumber, String errorMessage) {
+        return productRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new IllegalArgumentException(errorMessage));
+    }
+
+    private void validateSufficientFunds(Product account, BigDecimal amount) {
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Saldo insuficiente en la cuenta.");
+        }
+    }
+
+    private void updateAccountBalances(Product originAccount, Product destinationAccount, BigDecimal amount) {
+        if (originAccount != null) {
+            originAccount.setBalance(originAccount.getBalance().subtract(amount));
+            productRepository.save(originAccount);
+        }
+
+        if (destinationAccount != null) {
+            destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+            productRepository.save(destinationAccount);
+        }
+    }
+
+    private Transaccion saveTransaction(Product originAccount, Product destinationAccount, BigDecimal amount, Transaccion.Transaccion_type type) {
         Transaccion transaccion = new Transaccion();
-        transaccion.setTransaccion_type(Transaccion.Transaccion_type.Consignment);
-        transaccion.setAmount(request.amount());
+        transaccion.setTransaccion_type(type);
+        transaccion.setAmount(amount);
         transaccion.setTimestamp(LocalDateTime.now());
+        transaccion.setOriginAccount(originAccount);
         transaccion.setDestinationAccount(destinationAccount);
 
         return transaccionRepository.save(transaccion);
     }
-
-    @Transactional
-    public Transaccion processRetiro(RetiroRequest request) {
-        // Validar que la cuenta emisora exista
-        Product originAccount = productRepository.findByAccountNumber(request.originAccountNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta emisora no encontrada."));
-
-        // Validar que el saldo sea suficiente para realizar el retiro
-        if (originAccount.getBalance().compareTo(request.amount()) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente en la cuenta emisora.");
-        }
-
-        // Actualizar saldo de la cuenta emisora
-        originAccount.setBalance(originAccount.getBalance().subtract(request.amount()));
-        productRepository.save(originAccount);
-
-        // Crear y guardar la transacción
-        Transaccion transaccion = new Transaccion();
-        transaccion.setTransaccion_type(Transaccion.Transaccion_type.Withdrawal);
-        transaccion.setAmount(request.amount());
-        transaccion.setTimestamp(LocalDateTime.now());
-        transaccion.setOriginAccount(originAccount);
-
-        return transaccionRepository.save(transaccion);
-    }
-
-
 }
+
