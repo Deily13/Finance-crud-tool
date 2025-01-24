@@ -138,7 +138,7 @@ public class TransaccionServiceImplTest {
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> transaccionService.processTransaction(request));
         assertEquals("Saldo insuficiente en la cuenta.", exception.getMessage());
-        
+
         verify(productRepository, never()).save(any(Product.class));
         verify(transaccionRepository, never()).save(any(Transaccion.class));
     }

@@ -25,4 +25,4 @@ public record ClientRequestDTO(
 
         LocalDate birth_date
 ){
-        }
+}
