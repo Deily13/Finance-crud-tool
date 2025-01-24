@@ -42,7 +42,7 @@ public class Product {
     public enum Status {
         Activa,
         Inactiva,
-        Cancelada
+        ACTIVE, Cancelada
     }
 
     @NotNull
